@@ -1,11 +1,16 @@
 from fastapi import FastAPI
+from database import database
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Traffic Violation Detection Backend Running"}
+@app.on_event("startup")
+async def startup():
+    await database.connect()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
+@app.get("/")
+async def root():
+    return {"message": "Database Connected Successfully"}
